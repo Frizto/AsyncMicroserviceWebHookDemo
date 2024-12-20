@@ -13,12 +13,12 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<WebhookConsumer>();
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq://localhost", "/", h =>
+        cfg.Host("rabbitmq://localhost", c =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            c.Username("guest");
+            c.Password("guest");
         });
-        cfg.ReceiveEndpoint("email-webhook", e =>
+        cfg.ReceiveEndpoint("email-webhook-queue", e =>
         {
             e.ConfigureConsumer<WebhookConsumer>(context);
         });

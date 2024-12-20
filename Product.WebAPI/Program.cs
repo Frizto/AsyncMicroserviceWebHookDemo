@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using ProductWebAPI.Data;
 using ProductWebAPI.Repository;
@@ -18,6 +19,19 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 });
 
 builder.Services.AddScoped<IProduct, ProductRepo>();
+
+// RabbitMQ Configuration
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("rabbitmq://localhost", c =>
+        {
+            c.Username("guest");
+            c.Password("guest");
+        });
+    });
+});
 
 var app = builder.Build();
 

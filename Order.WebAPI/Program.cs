@@ -1,4 +1,6 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using OrderWebAPI.Consumer;
 using OrderWebAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,11 +12,31 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 // add db context
 builder.Services.AddDbContext<OrderDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+// RabbitMQ Configuration
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<ProductConsumer>();
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("rabbitmq://localhost", c =>
+        {
+            c.Username("guest");
+            c.Password("guest");
+        });
+        cfg.ReceiveEndpoint("product-queue", e =>
+        {
+            e.ConfigureConsumer<ProductConsumer>(context);
+        });
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
